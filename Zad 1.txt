@@ -1,0 +1,39 @@
+Zad 1.
+SELECT 
+     P.Nazwisko,
+	 P.Imie,
+	 L.NrEwid,
+	 W.Oplata
+from Pacjenci as P INNER JOIN Wizyty as W ON P.IdPacjenta = W.IdPacjenta
+                   INNER JOIN Lekarze as L ON L.IdLekarza = W.IdLekarza
+Where W.DataWizyty = '2013-04-22' and 
+      P.DataUrodzenia > '19871231'  and
+	  L.CzyKobieta = 1
+order by P.Nazwisko desc
+
+Zad 2.
+SELECT 
+     P.Nazwisko,
+	 P.Imie,
+	 P.Pesel,
+	 P.CzyKobieta
+from Pacjenci as P INNER JOIN Wizyty as W ON P.IdPacjenta = W.IdPacjenta
+                   INNER JOIN Lekarze as L ON L.IdLekarza = W.IdLekarza
+				   INNER JOIN Specjalizacje as S ON S.idspecjalizacji = L.Idspecjalizacji
+Where W.DataWizyty >= '2013-01-01' and W.DataWizyty <= '2013-06-30'    and (S.NazwaSpecjalizacji ='Diabetolog' or S.NazwaSpecjalizacji ='Chirurg')
+
+Zad 3.
+SELECT 
+     L.Nazwisko,
+	 L.Imie,
+	 P.Nazwisko,
+	 P.Imie,
+	 W.DataWizyty,
+	 W.Oplata
+from Pacjenci as P INNER JOIN Wizyty as W ON P.IdPacjenta = W.IdPacjenta
+                   INNER JOIN Lekarze as L ON L.IdLekarza = W.IdLekarza
+				   INNER JOIN Specjalizacje as S ON S.idspecjalizacji = L.Idspecjalizacji
+where W.DataWizyty >= '2013-03-01' and W.DataWizyty <= '2013-03-31'  
+                                   and L.CzyKobieta = P.CzyKobieta
+				   and L.DataUrodzenia < P.DataUrodzenia
+order by W.DataWizyty
