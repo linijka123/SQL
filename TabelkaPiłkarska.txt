@@ -1,0 +1,33 @@
+WITH CTE as 
+(
+	Select 
+	CONCAT(K.Nazwa, M.Nazwa) as  NazwaKlubu, K.Idmiejscowosci, K.IdKlubu
+	from Miasta as M inner join Kluby as K on M.IdMiejscowosci = K.Idmiejscowosci
+),  BramiZdobytePodczasWyjazdu as
+(
+	select sum(BramkiGoscia) as BramkiPodczasWyjazdu, NazwaKlubu, 
+	       sum(BramkiGospodarza) as BramkiStraconePodczasWyjazdu, 
+		   count(M.DataMeczu) as LiczbaMeczowPodczasWyjazdow, 
+		   count(case when BramkiGoscia > BramkiGospodarza then 1 end) as PunktyWyjazd, 
+		   count(case when BramkiGoscia = BramkiGospodarza then 1 end) as RemisWyjazd
+	from CTE as C inner join Mecze as M on C.IdKlubu = M.IdGoscia
+	group by NazwaKlubu
+) , BramkiZdobytePodczasGraniaUSiebie as
+(
+	Select sum(BramkiGospodarza) as BramiUSiebie, NazwaKlubu, 
+	       sum(BramkiGoscia) as BramkiStraconeUSiebie, 
+		   count(M.DataMeczu) as LiczbaMeczowPodczasGraniaUSiebie,
+		   count(case when BramkiGoscia < BramkiGospodarza then 1 end) as PunktyUSiebie,
+		   count(case when BramkiGoscia = BramkiGospodarza then 1 end) as RemisUSiebie
+	from CTE as C inner join Mecze as M on C.IdKlubu = M.IdGospodarza
+	group by NazwaKlubu
+) , TabelaWynikow as
+(
+	Select W.NazwaKlubu , BramkiPodczasWyjazdu + BramiUSiebie as BramkiZdobyte, 
+						  BramkiStraconePodczasWyjazdu + BramkiStraconeUSiebie as BramkiStracone,
+						  LiczbaMeczowPodczasWyjazdow + LiczbaMeczowPodczasGraniaUSiebie as LiczbaMeczow, 
+						  ((PunktyWyjazd + PunktyUSiebie) * 3) + RemisUSiebie + RemisWyjazd as Punkty
+	from BramiZdobytePodczasWyjazdu  as W inner join BramkiZdobytePodczasGraniaUSiebie as S on W.NazwaKlubu = S.NazwaKlubu
+)
+Select RANK() over (order by Punkty desc) as Pozycja, NazwaKlubu, LiczbaMeczow, Punkty, BramkiZdobyte, BramkiStracone
+from TabelaWynikow
