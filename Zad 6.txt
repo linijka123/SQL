@@ -1,0 +1,62 @@
+Zad 1.
+W bazie danych TRPrzychodnia wybrać pacjentki 
+(Nazwisko,imię ,pesel i dataurodzenia), 
+które miały skończone 80 lat w chwili przyjęcia przez diabetologoa w maju 2014. 
+Wynik uporządkować wedłg daty urodzenia pacjenta rosnąco.
+
+Select 
+   P.Nazwisko,
+   P.Imie,
+   P.Pesel , 
+   P.DataUrodzenia
+from Pacjenci as P INNER JOIN Wizyty as W ON P.IdPacjenta = W.IdPacjenta
+                   INNER JOIN Lekarze as L ON L.IdLekarza = W.IdLekarza
+				   INNER JOIN Specjalizacje as S ON S.idspecjalizacji = L.Idspecjalizacji
+where W.DataWizyty between '20140501' and '20140531' and P.CzyKobieta = 1
+                                    and S.NazwaSpecjalizacji = 'Diabetolog' and DATEDIFF(year,P.DataUrodzenia,W.DataWizyty) >= 80
+order by P.DataUrodzenia 
+
+Zadanie 2
+
+W bazie TRUczelnia wybrać studentki(nazwisko,imie,pesel), 
+które w roku 2015 miały średnią ocen (zaokrągloną do 2 miejsc po przecinku) 3.82.
+
+Select 
+   S.Nazwisko,
+   S.Imie,
+   S.Pesel 
+   from Oceny as O inner join Przedmioty as P on O.IdPrzedmiotu = P.IdPrzedmiotu
+                   inner join Studenci as S on S.IdStudenta = O.IdStudenta  
+   where O.DataOceny between '20150101' and '20151231' and S.CzyKobieta =1 
+   group by  S.Nazwisko,S.Imie, S.Pesel 
+   having round(avg(O.Ocena),2)  = 3.82
+
+
+zad 3.
+
+W bazie TRPrzychodnia wybrać lekarzy, którzy w dniach w których było co najmniej 300 wizyt
+ osiągnęli łaczną opłatę za swoje wizyty ponad 250 000 PLN.
+Wynik powinien zawierać nazwisko,imię, numer ewidencyjny lekarza oraz sumę opłat. 
+Uporządkować malejąco według sumy opłat.
+With OP as
+(
+   Select L.IdLekarza, 
+   sum(W.Oplata) as Suma
+   from Pacjenci as P  JOIN Wizyty as W ON P.IdPacjenta = W.IdPacjenta
+                       JOIN Lekarze as L ON L.IdLekarza = W.IdLekarza
+				       JOIN Specjalizacje as S ON S.idspecjalizacji = L.Idspecjalizacji
+   group by L.IdLekarza
+   having sum(W.Oplata) > 250000
+)
+Select 
+   L.Nazwisko,
+   L.Imie,
+   L.NrEwid , 
+   sum(W.Oplata) as Suma
+from Pacjenci as P INNER JOIN Wizyty as W ON P.IdPacjenta = W.IdPacjenta
+                   INNER JOIN Lekarze as L ON L.IdLekarza = W.IdLekarza
+				   INNER JOIN Specjalizacje as S ON S.idspecjalizacji = L.Idspecjalizacji
+Where L.IdLekarza in (Select L.IdLekarza from OP)
+group by  L.Nazwisko, L.Imie,  L.NrEwid 
+having count(*) >= 300
+order by Suma desc
