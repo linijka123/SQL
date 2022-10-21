@@ -1,0 +1,41 @@
+Zad 1.
+W bazie danych TRPrzychodnia, zrobić zestawienie zawierające:
+ nazwisko, imię, datę urodzenia oraz numer Pesel pacjentów w wieku ponad 65 lat( w momencie wizyty), 
+którzy w roku 2015 byli u co najmniej 3 różnych lekarzy rodzinnych. Wynik uporządkować malejąco według daty urodzenia.
+
+ Select 
+   P.Nazwisko,
+   P.Imie,
+   P.DataUrodzenia,
+   P.Pesel
+   from Pacjenci as P INNER JOIN Wizyty as W ON P.IdPacjenta = W.IdPacjenta
+                   INNER JOIN Lekarze as L ON L.IdLekarza = W.IdLekarza
+				   INNER JOIN Specjalizacje as S ON S.idspecjalizacji = L.Idspecjalizacji
+   where W.DataWizyty >= '20150101' and W.DataWizyty <= '20151231' and DATEDIFF(year,P.DataUrodzenia,W.DataWizyty ) > 65
+                                    and S.NazwaSpecjalizacji = 'Lekarz rodzinny'
+   group by P.Nazwisko, P.Imie , P.DataUrodzenia , P.Pesel
+   having count(distinct L.IdLekarza) >= 3
+   order by P.DataUrodzenia desc
+
+Zadanie 2.
+
+W bazie TRUczelnia zrobić zestawienie wykładowców (nazwisko, imię NIP),
+którzy studentom o dwóch najwyższych średnich ocen z roku 2015 w swoich grupach szkoleniowych,
+wystawili (w roku 2015) co najmniej 2 oceny niedostateczne.
+
+With Najlepsi as
+(
+     Select S.IdStudenta , IdGrupy ,
+	                 DENSE_RANK() over (partition by idgrupy
+					                    order by avg(ocena) desc) as rk
+					 , avg(Ocena) as Sr
+	 from oceny as O join Studenci as S on  S.IdStudenta = O.IdStudenta
+	 where DataOceny  between '20150101' and '20151231' 
+	 group by S.IdStudenta , IdGrupy
+)
+Select W.Nazwisko , W.Imie , W.Nip
+from Wykladowcy as W join Oceny O on W.IdWykladowcy = O.IdWykladowcy
+Where O.DataOceny between '20150101' and '20151231' and
+      O.Ocena = 2 and IdStudenta  in (Select IdStudenta from Najlepsi where rk < 3)
+group by W.Nazwisko , W.Imie , W.Nip
+having count(*) >= 2
