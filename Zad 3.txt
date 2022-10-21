@@ -1,0 +1,15 @@
+Zad 1.
+W bazie danych TRPrzychodnia przygotować zestawienie zawierające następujące dane; nazwisko, imię i numer ewidencyjny lekarza oraz liczbę wizyt, dla tych lekarzy, którzy w roku 2015 przyjęli w ramach wizyt co najmniej 50 różnych kobiet w wieku powyżej 75 lat.
+ Wynik uporządkować malejąco wg. liczby wizyt
+Select 
+   L.Nazwisko,
+   L.Imie,
+   L.NrEwid , 
+   count(*) as ile
+from Wizyty as W INNER JOIN Lekarze as L on W.IdLekarza = L.IdLekarza 
+                 INNER JOIN Pacjenci as P on W.IdPacjenta = P.IdPacjenta
+where W.DataWizyty >= '2015-01-01' and W.DataWizyty <= '2015-12-31' and P.CzyKobieta = 1
+                                   and Year(P.DataUrodzenia)<1940
+group by L.Nazwisko , L.Imie , L.NrEwid
+having count(distinct(P.IdPacjenta)) >= 50
+order by ile desc
