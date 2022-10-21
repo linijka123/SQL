@@ -1,4 +1,5 @@
 Zad 1.
+W bazie danych TRPrzychodnia, zrobić zestawienie wizyt z 22.04.2013, w których brali udział pacjenci urodzeni po roku 1987 a lekarz był kobietą. W zestawieniu powinny się znajdować następujące dane: nazwisko i imię pacjenta, numer ewidencyjny lekarza oraz kwota opłaty za wizytę. Wynik uporządkować według nazwiska pacjenta malejąco.
 SELECT 
      P.Nazwisko,
 	 P.Imie,
@@ -12,6 +13,7 @@ Where W.DataWizyty = '2013-04-22' and
 order by P.Nazwisko desc
 
 Zad 2.
+W bazie danych TRPrzychodnia napisać zapytanie zwracające następujące dane: nazwisko, imię, pesel i płeć tych pacjentów, którzy w pierwszym półroczu 2013 byli w diabetologa lub chirurga.
 SELECT 
      P.Nazwisko,
 	 P.Imie,
@@ -23,6 +25,7 @@ from Pacjenci as P INNER JOIN Wizyty as W ON P.IdPacjenta = W.IdPacjenta
 Where W.DataWizyty >= '2013-01-01' and W.DataWizyty <= '2013-06-30'    and (S.NazwaSpecjalizacji ='Diabetolog' or S.NazwaSpecjalizacji ='Chirurg')
 
 Zad 3.
+W bazie danych TRPrzychodnia napisać zapytanie zwracające następujące dane: nazwisko i imię lekarza, nazwisko i imię pacjenta, datę wizyty i kwotę opłaty za wizytę dla wizyt z marca 2013 w których lekarz był tej samej płci co pacjent i był od niego straszy. Wynik uporządkować według daty wizyty rosnąco
 SELECT 
      L.Nazwisko,
 	 L.Imie,
