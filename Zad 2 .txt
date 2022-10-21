@@ -1,0 +1,62 @@
+Zad 1.
+W bazie danych TRPrzychodnia przygotować zestawienie zawierające następujące dane; nazwisko, imię i Pesel pacjenta oraz liczbę wizyt danego pacjenta w II półroczu 2013. W wyniku uwzględnić tylko tych pacjentów, którzy byli przynajmniej 3 razy u lekarza.
+Wynik zapytania uporządkować malejąco według liczby wizyt
+SELECT 
+     P.Nazwisko,
+	 P.Imie,
+	 P.Pesel,
+	 count(*) as ileWizyt
+from Pacjenci as P INNER JOIN Wizyty as W ON P.IdPacjenta = W.IdPacjenta
+                   INNER JOIN Lekarze as L ON L.IdLekarza = W.IdLekarza
+				   INNER JOIN Specjalizacje as S ON S.idspecjalizacji = L.Idspecjalizacji
+Where W.DataWizyty >= '2013-07-01' and W.DataWizyty <= '2013-12-31' 
+group by P.Nazwisko , P.Imie , P.Pesel 
+having count(*) >= 3  
+order by count(*) desc
+
+Zad 2.
+W bazie danych TRUczelnia przygotować zestawienie zawierające następujące dane; nazwę przedmiotu oraz liczbę ocen bardzo dobrych wystawionych studentkom w roku 2013 z tego przedmiotu.
+Wynik uporządkować malejąco według liczby ocen.
+Select 
+   P.Nazwa,
+   O.IdRodzajuOceny,
+   count(*) as ileWizyt
+   from Oceny as O inner join Przedmioty as P on O.IdPrzedmiotu = P.IdPrzedmiotu
+                   inner join Studenci as S on S.IdStudenta = O.IdStudenta                
+   Where O.DataOceny >= '2013-01-01' and O.DataOceny <= '2013-12-31'  and CzyKobieta = 1 and O.IdRodzajuOceny = 5
+   group by P.Nazwa , O.IdRodzajuOceny
+   order by count(*) desc
+
+Zad 3.
+W bazie TRPrzychodnia napisać zapytanie, które zwróci dane pacjentek urodzonych po roku 1965; nazwisko, imię i pesel, które w roku 2013 miały przynajmniej trzy wizyty u lekarza rodzinnego i przynajmniej 3 wizyty u innych specjalistów.
+SELECT 
+     P.Nazwisko,
+	 P.Imie,
+	 P.Pesel
+from Pacjenci as P INNER JOIN Wizyty as W ON P.IdPacjenta = W.IdPacjenta
+                   INNER JOIN Lekarze as L ON L.IdLekarza = W.IdLekarza
+				   INNER JOIN Specjalizacje as S ON S.idspecjalizacji = L.Idspecjalizacji
+Where P.CzyKobieta = 1 and P.DataUrodzenia > '1965-12-31' and W.DataWizyty <= '2013-12-31' and W.DataWizyty >= '2013-01-01'
+                       and  S.NazwaSpecjalizacji = 'Lekarz rodzinny'
+group by P.Nazwisko , P.Imie , P.Pesel 
+having count(*) >= 3  
+intersect
+SELECT 
+     P.Nazwisko,
+	 P.Imie,
+	 P.Pesel
+from Pacjenci as P INNER JOIN Wizyty as W ON P.IdPacjenta = W.IdPacjenta
+                   INNER JOIN Lekarze as L ON L.IdLekarza = W.IdLekarza
+				   INNER JOIN Specjalizacje as S ON S.idspecjalizacji = L.Idspecjalizacji
+Where P.CzyKobieta = 1 and P.DataUrodzenia > '1965-12-31' and W.DataWizyty <= '2013-12-31' and W.DataWizyty >= '2013-01-01'
+                       and  S.NazwaSpecjalizacji != 'Lekarz rodzinny'
+group by P.Nazwisko , P.Imie , P.Pesel 
+having count(*) >= 3  
+
+
+
+
+
+
+
+
